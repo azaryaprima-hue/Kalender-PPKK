@@ -8,12 +8,14 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
 <style>
+
 body{
 font-family:Arial;
 max-width:900px;
 margin:auto;
 padding:20px;
 }
+
 </style>
 
 </head>
@@ -24,20 +26,26 @@ padding:20px;
 
 <div id="calendar"></div>
 
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
 
 const firebaseConfig = {
-apiKey: "API_KEY_KAMU",
-authDomain: "PROJECT.firebaseapp.com",
-projectId: "PROJECT_ID"
-}
+  apiKey: "AIzaSyDaamtGHASyn5mk2WmwNVkmEf0fYH4o-6k",
+  authDomain: "kalender-ppkk.firebaseapp.com",
+  projectId: "kalender-ppkk",
+  storageBucket: "kalender-ppkk.firebasestorage.app",
+  messagingSenderId: "171816159723",
+  appId: "1:171816159723:web:ec79eced1d9ab85e2c31ae"
+};
 
-firebase.initializeApp(firebaseConfig)
+firebase.initializeApp(firebaseConfig);
 
-const db = firebase.firestore()
+const db = firebase.firestore();
+
+let events = []
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -49,6 +57,8 @@ initialView: 'dayGridMonth',
 
 selectable:true,
 
+events:events,
+
 select:function(info){
 
 let nama = prompt("Nama")
@@ -57,12 +67,23 @@ let ket = prompt("Keterangan")
 if(!nama) return
 
 let event = {
-title:nama+" - "+ket,
+title:nama + " - " + ket,
 start:info.startStr,
 end:info.endStr
 }
 
-db.collection("events").add(event)
+db.collection("events").add(event).then(doc=>{
+
+event.id = doc.id
+
+calendar.addEvent({
+id:doc.id,
+title:event.title,
+start:event.start,
+end:event.end
+})
+
+})
 
 },
 
@@ -74,6 +95,8 @@ if(action=="HAPUS"){
 
 db.collection("events").doc(info.event.id).delete()
 
+info.event.remove()
+
 }
 
 }
@@ -82,9 +105,9 @@ db.collection("events").doc(info.event.id).delete()
 
 calendar.render()
 
-db.collection("events").onSnapshot(snapshot=>{
+// LOAD DATA FIREBASE
 
-calendar.removeAllEvents()
+db.collection("events").get().then(snapshot=>{
 
 snapshot.forEach(doc=>{
 
