@@ -73,6 +73,7 @@ end:info.endStr
 }
 
 db.collection("events").add(event).then(doc=>{
+console.log("Event tersimpan:", doc.id)
 
 event.id = doc.id
 
